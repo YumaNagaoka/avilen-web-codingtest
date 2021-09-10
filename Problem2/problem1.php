@@ -15,12 +15,7 @@ while($input_line = fgets(STDIN)) {
 }
 //入力した値をそれぞれの変数に格納
 list($n, $N) = explode(" ", $input_array[0]);       
-// echo " {$n}";
-// echo " {$N}";
 $A = explode(" ", $input_array[1]);
-// for($i = 0; $i < $n; $i++){
-//     echo " {$A[$i]}";
-// }
 
 //入力した水溶液の濃度の最小値と最大値を求める
 $A_min = $A[0];
