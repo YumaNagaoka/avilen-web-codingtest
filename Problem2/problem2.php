@@ -13,81 +13,114 @@ while($input_line = fgets(STDIN)) {
     array_push($input_array, $input_line);
 }
 //入力した値をそれぞれの変数に格納
-$T = $input_array[0];       
-// echo " {$T}";
-// for($i = 0; $i < $T; $i++){
-//     list($A[$i], $B[$i], $C[$i]) = explode(" ", $input_array[$i + 1]);
-//     echo "{$A[$i]} {$B[$i]} {$C[$i]}";
-    
-// }
+$T = $input_array[0];
+// echo $T, "\n";       
 for($i = 0; $i < $T; $i++){
     list($A, $B, $C) = explode(" ", $input_array[$i + 1]);
-    // echo "{$A} {$B} {$C}";
-    // proc((int)$A, (int)$B, (int)$C);
     $ans = proc($A, $B, $C);
     echo "{$ans}\n";
 }
 
-
+//
 function proc($a, $b, $c){
-    $count = 0;
+    // echo "procを実行";
+    $count_A = 0;
+    $count_B = 0;
+    $count_C = 0;
     $ans_list = [];
     $a = (int) $a;
     $b = (int) $b;
     $c = (int) $c;
-    //3重ループを作る
-    //Aに対する操作
-    $x = $a;
-    for($i = 0; $i < 99; $i++){
-        if($i > 0 && 2 <= $x){
-            $x--;
-            // echo "A - 1を実行\n";
-        }
-        //Bに対する操作
-        $y = $b;
-        for($j = 0; $j < 99; $j++){
-            if($j > 0 && 2 <= $y){
-                $y--;
-                // echo "B - 1を実行\n";
+    $flg = false;
+    $flg_escapeA = false;
+    $flg_escapeB = false;
+    $flg_escapeC = false;
+    //Cが一番大きいとき
+    if($c > $a && $c > $b){
+        // echo "Cが一番大きいとき";
+        if($a != 1){    //aが1以外のとき
+            $flg_escapeC = true;
+        }else {     //aが1のとき
+            if($b > $a){
+                $count_C = $c - $b;
+                $c = $b;
+            }elseif($a == $b){
+                return 1;
+            }else {
+                $count_C = $c - $a;
+                $c = $a;
             }
-            //Cに対する操作
-            $z = $c;
-            for($k = 0; $k < 99; $k++){
-                if($k > 0 && 2 <= $z){  
-                    $z--;
-                    // echo "C - 1を実行\n";
-                }
-                //正解の条件
-                if(!($x < $y && $y < $z) && !($z < $y && $y < $x) && ($x != $y && $y != $z && $z != $x)){
-                    $ans = $i + $j + $k;
-                    // echo "answer {$ans} i:{$i}, j:{$j}, k{$k}\n";
-                    array_push($ans_list, $ans);
-                }
-                if($z == 1)
-                    $k = 99;
-            }
-            if($y == 1)
-                $j = 99;
         }
-        if($x == 1)
-            $i = 99;
+    }elseif($a > $c && $a > $b){ //Aが一番大きいとき
+        // echo "Aが一番大きいとき";
+        $flg_escapeA = true;
+        if($b > $c){
+            $flg_escapeC = true;
+        }elseif($c == $b){
+            return 1;
+        }
+    }elseif($b > $c && $b > $a) {//Bが一番大きいとき
+        // echo "Bが一番大きいとき";
+        if($a == $c){
+            return 1;
+        }
+        $flg_escapeB = true;
+    }elseif($a == $c && $a > $b){
+        // echo "AとCが同じでBより大きいとき";
+        if($a - 1 == $b){//BがAとCより1だけ小さいとき
+            return 2;
+        }
+        return 1;
+    }elseif($a == $b && $a == $c){
+        // echo "ABCが同じ数のとき";
+        return 3;
     }
 
+    $count_a = $count_A;
+    $count_b = $count_B;
+    $count_c = $count_C;
+    //3重ループを作る
+    //Aに対する操作
+    for($x = $a; $x >= 1; $x--, $count_a++){
+        //Bに対する操作
+        for($y = $b; $y >= 1; $y--, $count_b++){
+            //Cに対する操作
+            for($z = $c; $z >= 1; $z--, $count_c++){
+                // echo $count_a, $count_b, $count_c, "\n";
+                //正解の条件
+                if(!($x < $y && $y < $z) && !($z < $y && $y < $x) && ($x != $y && $y != $z && $z != $x)){
+                    
+                    $entire_count = $count_a + $count_b + $count_c;
+                    // echo "answer {$entire_count} A:{$x}, B:{$y}, C{$z}\n";
+                    if($entire_count == 0){
+                        return 0;
+                    }
+                    array_push($ans_list, $entire_count);
+                    $flg = true;
+                    break;
+                }
+                if ($flg_escapeC){
+                    break;
+                }
+            }
+            $count_c = $count_C;
+            if ($flg || $flg_escapeB){
+                break;
+            }
+        }
+        $count_b = $count_B;
+        if($flg || $flg_escapeA)
+            break;
+    }
+    //最小の操作回数をreturn。また、条件を満たせなければ-1をreturn
     if(empty($ans_list)){
         return -1;
     }else{
         sort($ans_list);
-        return $ans_list[0];
+        $ans = $ans_list[0];
+        unset($ans_list);
+        return $ans;
     }
 }
-
-// function minAns($ans_list){
-//     if(empty($ans_list)){
-//         return -1;
-//     }else{
-//         sort($ans_list);
-//         return $ans_list[0];
-//     }
-// }
 
 ?>
